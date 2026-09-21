@@ -1,3 +1,6 @@
+#include"Color.h"
+#include "Vector3.h"
+
 #include<iostream>
 
 int main()
@@ -15,18 +18,14 @@ int main()
 		std::clog << "\rScanlines remaining " << (ImageHeight - j) << ' ' << std::flush;
 		for (int i = 0; i < ImageWidth; i++)
 		{
-			auto r = double(i) / (ImageWidth - 1);
-			auto g = double(j) / (ImageHeight - 1);
-			auto b = 0.0;
+			
+			auto pixelColor = Color(double(i) / (ImageHeight - 1), double(j) / (ImageHeight - 1), 0);
+			WriteColor(std::cout, pixelColor);
 
-			int ir = int(255.999 * r);
-			int ig = int(255.999 * g);
-			int ib = int(255.999 * b);
-
-			std::cout << ir << ' ' << ig << ' ' << ib << '\n';
 
 		}
 	}
+	std::clog << "\rDone.            \n";
 	
 	return 0;
 }
