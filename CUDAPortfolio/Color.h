@@ -1,8 +1,7 @@
 #pragma once
 
-#include"Vector3.h"
-
 #include <iostream>
+#include"Shared.h"
 
 using Color = Vec3;
 

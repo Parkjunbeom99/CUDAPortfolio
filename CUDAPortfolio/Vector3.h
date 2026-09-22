@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cmath>
-
+#include"Shared.h"
+#include<cmath>
 #include<iostream>
 
 struct Vector3

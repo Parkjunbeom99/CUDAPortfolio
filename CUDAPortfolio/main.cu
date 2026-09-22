@@ -5,24 +5,40 @@
 
 
 #include<iostream>
+#include "Hittable.h"
+#include "HittableList.h"
+#include "Sphere.h"
 
-bool HitSphere(const Point3& center, double radius, const Ray& r)
+double HitSphere(const Point3& center, double radius, const Ray& r)
 {
 	Vec3 oc = center - r.Origin();
-	auto a = Dot(r.Direction(), r.Direction());
-	auto b = -2.0 * Dot(r.Direction(), oc);
-	auto c = Dot(oc, oc) - radius * radius;
+	auto a = r.Direction().LengthSquared();
+	auto h = Dot(r.Direction(), oc);
+	auto c = oc.LengthSquared() - radius * radius;
 
-	auto discriminant = b * b - 4 * a * c;
-	return (discriminant >= 0);
+	auto discriminant = h * h - a * c;
+
+
+	if (discriminant < 0.0)
+	{
+		return -1.0;
+
+	}
+
+	return (h - std::sqrt(discriminant)) / a;
+
+	
 }
 
-Color RayColor(const Ray& r)
+Color RayColor(const Ray& r, const Hittable& world)
 {
-	if (HitSphere(Point3(0, 0, -1), 0.5, r))
+	HitRecord hitRecord;
+
+	if (world.Hit(r, Interval(0.0, Infinity), hitRecord))
 	{
-		return Color(1, 0, 0);
+		return 0.5 * (hitRecord.Normal + Color(1.0, 1.0, 1.0));
 	}
+
 
 	Vec3 unitDirection = UnitVector(r.Direction());
 	auto a = 0.5 * (unitDirection.Y() + 1.0);
@@ -35,9 +51,14 @@ int main()
 	auto aspectRatio = 16.0 / 9.0;
 	int imageWidth = 400;
 
-	int imageHeight = int(imageWidth / aspectRatio);
-
+	int imageHeight = static_cast<int>(imageWidth / aspectRatio);
 	imageHeight = (imageHeight < 1) ? 1 : imageHeight;
+
+	//world
+	HittableList world;
+	world.Add(std::make_shared<Sphere>(Point3(0.0, 0.0, -1.0), 0.5));
+	world.Add(std::make_shared<Sphere>(Point3(0.0, -100.5, -1.0), 100.0));
+
 
 	//camera
 
@@ -70,7 +91,7 @@ int main()
 			auto rayDirection = pixelCenter - cameraCenter;
 			Ray r(cameraCenter, rayDirection);
 
-			Color pixelColor = RayColor(r);
+			Color pixelColor = RayColor(r, world);
 			WriteColor(std::cout, pixelColor);
 		}
 	}
