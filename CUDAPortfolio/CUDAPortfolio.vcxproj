@@ -84,10 +84,13 @@
     <CudaCompile Include="main.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="Hittable.h" />
     <ClInclude Include="HittableList.h" />
     <ClInclude Include="Interval.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="Metal.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="Shared.h" />
     <ClInclude Include="Sphere.h" />

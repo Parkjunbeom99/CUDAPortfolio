@@ -16,7 +16,7 @@ struct Vector3
 	
 	double Z() const { return E[2]; }
 
-	Vector3 operator-() const { return Vector3(-E[0], -E[1], -E[3]); }
+	Vector3 operator-() const { return Vector3(-E[0], -E[1], -E[2]); }
 
 	double operator[](int i) const { return E[i]; }
 
@@ -56,7 +56,30 @@ struct Vector3
 		return E[0] * E[0] + E[1] * E[1] + E[2] * E[2];
 	}
 
-	double E[3];
+	static Vector3 Random()
+	{
+		return Vector3(RandomDouble(), RandomDouble(), RandomDouble());
+	}
+
+	static Vector3 Random(double minimum, double maxmimum)
+	{
+		return Vector3(
+			RandomDouble(minimum, maxmimum),
+			RandomDouble(minimum, maxmimum),
+			RandomDouble(minimum, maxmimum)
+
+		);
+	}
+	
+	bool NearZero()const
+	{
+		auto threshold = 1e-8;
+
+		return (std::fabs(E[0]) < threshold)
+			&& (std::fabs(E[1]) < threshold)
+			&& (std::fabs(E[3]) < threshold);
+	}
+	double E[3] = {};
 };
 
 typedef Vector3 Vec3;
@@ -120,3 +143,33 @@ inline Vector3 UnitVector(const Vector3& v)
 	return v / v.Length();
 }
 
+inline Vector3 RandomUnitVector()
+{
+	while (true)
+	{
+		auto p = Vector3::Random(-1.0, 1.0);
+		auto lengthSquared = p.LengthSquared();
+
+		if (1e-160 < lengthSquared &&lengthSquared <= 1.0)
+		{
+			return p / std::sqrt(lengthSquared);
+		}
+	}
+}
+
+inline Vector3 RandomOnHemisphere(const Vector3& normal)
+{
+	Vector3 unitSphereDirection = RandomUnitVector();
+
+	if (Dot(unitSphereDirection, normal) > 0.0)
+	{
+		return unitSphereDirection;
+	}
+
+	return -unitSphereDirection;
+}
+
+inline Vec3 Reflect(const Vec3& v, const Vec3& n)
+{
+	return v - 2.0 * Dot(v, n) * n;
+}

@@ -3,20 +3,24 @@
 #include"Shared.h"
 #include "Ray.h"
 
+
+class Material;
+
 class HitRecord
 {
 public:
 
 	void SetFaceNormal(const Ray& r, const Vec3& outwardNormal)
 	{
-		bFrontFace = Dot(r.Direction(), outwardNormal) < 0;
-		Normal = bFrontFace ? outwardNormal : -outwardNormal;
+		isFrontFace = Dot(r.Direction(), outwardNormal) < 0;
+		normal = isFrontFace ? outwardNormal : -outwardNormal;
 	}
 
-	Point3 P;
-	Vec3 Normal;
+	Point3 point;
+	Vec3 normal;
 	double T;
-	bool bFrontFace;
+	bool isFrontFace =false;
+	std::shared_ptr<Material> material;
 };
 
 class Hittable

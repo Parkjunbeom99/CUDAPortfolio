@@ -5,13 +5,14 @@
 
 #include<cmath>
 #include<iostream>
+#include<memory>
 
 
 class Sphere : public Hittable
 {
 public :
-	Sphere(const Point3& center, double radius)
-		:mCenter(center),mRadius(radius)
+	Sphere(const Point3& center, double radius, const std::shared_ptr<Material>& material)
+		:mCenter(center),mRadius(std::fmax(0.0, radius)),mMaterial(material)
 	{
 
 	}
@@ -44,10 +45,12 @@ public :
 			}
 		}
 		rec.T = root;
-		rec.P = r.At(rec.T);
+		rec.point = r.At(rec.T);
 
-		Vec3 outwardNormal = (rec.P - mCenter) / mRadius;
+		Vec3 outwardNormal = (rec.point - mCenter) / mRadius;
 		rec.SetFaceNormal(r, outwardNormal);
+
+		rec.material = mMaterial;
 
 		return true;
 	}
@@ -55,5 +58,7 @@ public :
 private :
 	Point3 mCenter;
 	double mRadius;
+	std::shared_ptr<Material> mMaterial;
+
 
 };
