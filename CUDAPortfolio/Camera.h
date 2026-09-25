@@ -11,6 +11,13 @@ public:
 	int samplesPerPixel = 10; // random samples for pixel
 	int maxDepth = 10;
 
+	double vfov = 90;
+	Point3 lookfrom = Point3(0, 0, 0);
+	Point3 lookat = Point3(0, 0, -1);
+
+	Vec3 vup = Vec3(0, 1, 0);
+
+
 
 	void Render(const Hittable& world)
 	{
@@ -53,16 +60,27 @@ private :
 
 		mPixelSamplesScale = 1.0 / static_cast<double>(samplesPerPixel);
 
-		mCenter = Point3(0.0, 0.0, 0.0);
+		mCenter = lookfrom;
 
 		//Viewpoert
-		auto focalLength = 1.0;
-		auto viewportHeight = 2.0;
+		auto focalLength = (lookfrom - lookat).Length();
+		auto theta = DegreesToRadians(vfov);
+		auto h = std::tan(theta / 2);
+
+		auto viewportHeight = 2* h *focalLength;
 		auto viewportWidth = viewportHeight * (static_cast<double>(imageWidth) / mImageHeight);
 
+		//Camera Location
+		w = UnitVector(lookfrom - lookat);
+
+		u = UnitVector(Cross(vup, w));
+
+		v = Cross(w, u);
+
+
 		//Vector view horizontal and down
-		auto viewportU = Vec3(viewportWidth, 0.0, 0.0);
-		auto viewportV = Vec3(0.0, -viewportHeight, 0.0);
+		auto viewportU = viewportWidth * u;
+		auto viewportV = viewportHeight * -v;
 
 		//delta vectors form pixel to pixel
 		mPixelDeltaU = viewportU / imageWidth;
@@ -70,7 +88,7 @@ private :
 
 		auto viewportUpperLeft =
 			mCenter
-			- Vec3(0.0, 0.0, focalLength)
+			- focalLength * w
 			- viewportU / 2.0
 			-viewportV / 2.0;
 
@@ -144,4 +162,6 @@ private:
 	Point3 mPixel00Location; // 0,0
 	Vec3 mPixelDeltaU;
 	Vec3 mPixelDeltaV;
+
+	Vec3 u, v, w;
 };
