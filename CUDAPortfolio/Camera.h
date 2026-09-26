@@ -3,6 +3,24 @@
 #include "Hittable.h"
 #include "Material.h"
 
+
+inline Vector3 RandomInUnitDisk()
+{
+	while (true)
+	{
+		Vec3 point(
+			RandomDouble(-1.0, 1.0),
+			RandomDouble(-1.0, 1.0),
+			0.0
+		);
+
+		if (point.LengthSquared() < 1.0)
+		{
+			return point;
+		}
+	}
+}
+
 class Camera
 {
 public:
@@ -16,6 +34,9 @@ public:
 	Point3 lookat = Point3(0, 0, -1);
 
 	Vec3 vup = Vec3(0, 1, 0);
+
+	double defocus_angle = 0; 
+	double focus_dist = 10; // distance camera
 
 
 
@@ -63,11 +84,10 @@ private :
 		mCenter = lookfrom;
 
 		//Viewpoert
-		auto focalLength = (lookfrom - lookat).Length();
 		auto theta = DegreesToRadians(vfov);
 		auto h = std::tan(theta / 2);
 
-		auto viewportHeight = 2* h *focalLength;
+		auto viewportHeight = 2* h * focus_dist; 
 		auto viewportWidth = viewportHeight * (static_cast<double>(imageWidth) / mImageHeight);
 
 		//Camera Location
@@ -88,11 +108,19 @@ private :
 
 		auto viewportUpperLeft =
 			mCenter
-			- focalLength * w
+			- focus_dist * w
 			- viewportU / 2.0
 			-viewportV / 2.0;
 
 			mPixel00Location = viewportUpperLeft + 0.5 * (mPixelDeltaU + mPixelDeltaV);
+
+
+			const double defocusRadius =
+				focus_dist * std::tan(DegreesToRadians(defocus_angle * 0.5));
+
+			mDefocusDiskU = u * defocusRadius;
+			mDefocusDiskV = v * defocusRadius;
+
 
 	}
 	
@@ -106,7 +134,7 @@ private :
 			+ ((pixelIndex + offset.X()) * mPixelDeltaU)
 			+ ((scanlineIndex + offset.Y()) * mPixelDeltaV);
 
-		auto rayOrigin = mCenter;
+		auto rayOrigin = (defocus_angle <= 0.0) ? mCenter : DefocusDiskSample();
 		auto rayDirection = pixelSample - rayOrigin;
 
 		return Ray(rayOrigin, rayDirection);
@@ -117,6 +145,14 @@ private :
 		//return randomvalue -0.5 ~ 0.5
 		return Vec3(RandomDouble() - 0.5, RandomDouble() - 0.5, 0.0);
 	}
+
+	Point3 DefocusDiskSample() const
+	{
+		const Vec3 point = RandomInUnitDisk();
+		return mCenter + (point.X() * mDefocusDiskU) + (point.Y() * mDefocusDiskV);
+
+	}
+
 
 	Color RayColor(const Ray& ray,int depth,const Hittable& world) const
 	{
@@ -164,4 +200,9 @@ private:
 	Vec3 mPixelDeltaV;
 
 	Vec3 u, v, w;
+
+	Vec3 mDefocusDiskU;
+	Vec3 mDefocusDiskV;
+
+
 };
